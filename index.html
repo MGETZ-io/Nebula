@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Search</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #e94560;
+            text-align: center;
+        }
+
+        /* Splash Screen */
+        #splash {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: #0f0f1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
+        }
+
+        #splash img {
+            width: 300px;
+            height: auto;
+        }
+
+        /* Hauptseite */
+        #main-content {
+            display: none;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        #search-container {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border: 2px solid #e94560;
+            border-radius: 5px;
+            background-color: #0f3460;
+            color: white;
+        }
+
+        button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            background-color: #e94560;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #f54272;
+        }
+
+        #results {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+            width: 60%;
+        }
+
+        a {
+            color: #e94560;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <img src="nebula_search_logo.png" alt="Nebula Search Logo">
+    </div>
+
+    <!-- Hauptinhalt -->
+    <div id="main-content">
+        <h1>Nebula Search</h1>
+        <div id="search-container">
+            <input type="text" id="search" placeholder="Suche...">
+            <button onclick="search()">Suchen</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Splash Screen nach 3 Sekunden ausblenden
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById("splash").style.opacity = "0";
+                setTimeout(() => {
+                    document.getElementById("splash").style.display = "none";
+                    document.getElementById("main-content").style.display = "block";
+                }, 1000);
+            }, 3000);
+        };
+
+        // Suchfunktion mit DuckDuckGo API
+        async function search() {
+            let query = document.getElementById("search").value;
+            if (!query) return;
+
+            let url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&pretty=1`;
+
+            let response = await fetch(url);
+            let data = await response.json();
+
+            let resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "";
+
+            if (data.RelatedTopics.length > 0) {
+                data.RelatedTopics.forEach(topic => {
+                    if (topic.Text && topic.FirstURL) {
+                        let resultItem = `<p><a href="${topic.FirstURL}" target="_blank">${topic.Text}</a></p>`;
+                        resultsDiv.innerHTML += resultItem;
+                    }
+                });
+            } else {
+                resultsDiv.innerHTML = "<p>Keine Ergebnisse gefunden.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
